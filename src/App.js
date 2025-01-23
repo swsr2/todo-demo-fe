@@ -1,90 +1,38 @@
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-
-import TodoBoard from "./components/TodoBoard";
-
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Container from "react-bootstrap/Container";
+import { Routes, Route } from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import TodoPage from "./pages/TodoPage";
+import RegisterPage from "./pages/RegisterPage";
+import PrivateRoute from "./route/PrivateRoute";
 import { useEffect, useState } from "react";
-import api from './utils/api'
+import api from "./utils/api";
+
 function App() {
-  const [todoList, setTodoList] = useState([])
-  const [todoValue, setTodoValue] = useState('')
-  // 가져오기
-  const getTasks = async () => {
-    const response = await api.get('/tasks')
-    console.log("여기", response)
-    setTodoList(response.data.data)
-  }
-  // 저장하기 
-  const addTask = async () => {
+  // 간단한 과제이므로 리덕스 대신 부모에 만들자.
+  const [user, setUser] = useState(null)
+
+  // 유저(토큰으로) 확인 - 백엔드랑 연결
+  const getUser = async () => {
     try {
-      const response = await api.post('/tasks', { task: todoValue, isComplete: false });
-      if (response.status === 200) {
-        console.log('Success')
-        setTodoValue(''); // 입력창 초기화
-        getTasks() // 추가한 값이 보이게 
-      } else {
-        throw new Error("Task can not be added")
+      const storedToken = sessionStorage.getItem('token');
+      if (storedToken) {
+        const response = await api.get('/user/me')
+        setUser(response.data.user)
       }
     } catch (error) {
-      console.log("error", error)
+      setUser(null)
     }
   }
-  // isComplete 수정
-  const toggleComplete = async (id) => {
-    try {
-      const task = todoList.find((item) => item._id === id);
-      const response = await api.put(`/tasks/${id}`, {
-        isComplete: !task.isComplete,
-      });
-      if (response.status === 200) {
-        getTasks();
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-  // 삭제
-  const deleteItem = async (id) => {
-    try {
-      console.log(id);
-      const response = await api.delete(`/tasks/${id}`);
-      if (response.status === 200) {
-        getTasks();
-      }
-    } catch (error) {
-      console.log("error", error);
-    }
-  };
-  // 처음 보였을때 리스트 가져오기 
   useEffect(() => {
-    getTasks()
+    getUser()
   }, [])
   return (
-    <Container>
-      <Row className="add-item-row">
-        <Col xs={12} sm={10}>
-          <input
-            type="text"
-            placeholder="할일을 입력하세요"
-            className="input-box"
-            value={todoValue}
-            onChange={(event) => setTodoValue(event.target.value)}
-          />
-        </Col>
-        <Col xs={12} sm={2}>
-          <button className="button-add" onClick={addTask}>추가</button>
-        </Col>
-      </Row>
-
-      <TodoBoard
-        todoList={todoList}
-        deleteItem={deleteItem}
-        toggleComplete={toggleComplete}
-      />
-    </Container>
+    <Routes>
+      <Route path="/" element={<PrivateRoute user={user}><TodoPage setUser={setUser} /></PrivateRoute>} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/login" element={<LoginPage user={user} setUser={setUser} />} />
+    </Routes>
   );
 }
 
