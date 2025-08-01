@@ -13,18 +13,13 @@ const LoginPage = ({ user, setUser }) => {
     const checkUser = async (event) => {
         event.preventDefault()
         try {
-            //api 호출 
             const response = await api.post('/user/login', { email, password })
             if (response.status === 200) {
-                // user && 토큰저장
-                // local(창닫아도 살아있음), session(창닫으면 죽음) 
                 setUser(response.data.user)
                 // console.log("유저", user)
                 sessionStorage.setItem("token", response.data.token)
-                // 토큰을 헤더에 저장
                 api.defaults.headers["authorization"] = "Bearer " + response.data.token
                 setError("")
-                // todoPage 링크 
                 navigate('/')
             }
             throw new Error(response.message)

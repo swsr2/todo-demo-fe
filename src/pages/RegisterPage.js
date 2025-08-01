@@ -11,13 +11,12 @@ const RegisterPage = () => {
     const [error, setError] = useState('')
     const navigate = useNavigate()
     const handleSubmit = async (event) => {
-        // Form은 백엔드를 호출하기 위해 리프래시를 시키는데, react는 리로드를 안하므로 막아줘야함
+
         event.preventDefault()
         try {
             if (password !== secPassword) {
                 throw new Error("패스워드가 일치하지 않습니다.")
             }
-            //api
             const response = await api.post('/user', { name, email, password })
             if (response.status === 200) {
                 navigate('/login')
