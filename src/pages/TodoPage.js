@@ -84,6 +84,11 @@ const TodoPage = ({ setUser, user }) => {
             className="input-box"
             value={todoValue}
             onChange={(event) => setTodoValue(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                addTask();
+              }
+            }}  
           />
         </Col>
         <Col xs={12} sm={2}>
