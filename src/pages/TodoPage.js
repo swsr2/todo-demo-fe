@@ -13,7 +13,6 @@ const TodoPage = ({ setUser, user }) => {
 
   const getTasks = async () => {
     const response = await api.get("/tasks");
-    console.log("여기", response.data.data);
     setTodoList(response.data.data);
   };
 
@@ -51,7 +50,6 @@ const TodoPage = ({ setUser, user }) => {
 
   const deleteItem = async (id) => {
     try {
-      console.log(id);
       const response = await api.delete(`/tasks/${id}`);
       if (response.status === 200) {
         getTasks();
@@ -88,7 +86,7 @@ const TodoPage = ({ setUser, user }) => {
               if (event.key === "Enter") {
                 addTask();
               }
-            }}  
+            }}
           />
         </Col>
         <Col xs={12} sm={2}>
