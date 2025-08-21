@@ -1,63 +1,130 @@
 import React, { useState } from "react";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import api from "../utils/api";
-import { useNavigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Grid,
+  Link,
+  Alert,
+} from "@mui/material";
+
 const RegisterPage = () => {
-    const [name, setName] = useState('')
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [secPassword, setSecPassword] = useState('')
-    const [error, setError] = useState('')
-    const navigate = useNavigate()
-    const handleSubmit = async (event) => {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [secPassword, setSecPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-        event.preventDefault()
-        try {
-            if (password !== secPassword) {
-                throw new Error("패스워드가 일치하지 않습니다.")
-            }
-            const response = await api.post('/user', { name, email, password })
-            if (response.status === 200) {
-                navigate('/login')
-            } else {
-                throw new Error(response.data.error)
-            }
-        } catch (error) {
-            setError(error.message)
-        }
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Email validation
+    const emailRegex = /@/;
+    if (!emailRegex.test(email)) {
+      setError("올바른 이메일 형식이 아닙니다.");
+      return;
     }
-    return (
-        <div className="display-center">
-            {error && <div className="red-error">{error}</div>}
-            <Form className="login-box" onSubmit={handleSubmit}>
-                <h1>회원가입</h1>
-                <Form.Group className="mb-3" controlId="formName">
-                    <Form.Label>Name</Form.Label>
-                    <Form.Control type="string" placeholder="Name" onChange={(event) => setName(event.target.value)} />
-                </Form.Group>
 
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                    <Form.Label>Email address</Form.Label>
-                    <Form.Control type="email" placeholder="Enter email" onChange={(event) => setEmail(event.target.value)} />
-                </Form.Group>
+    try {
+      if (password !== secPassword) {
+        throw new Error("패스워드가 일치하지 않습니다. 다시 확인해주세요.");
+      }
+      const response = await api.post("/user", { name, email, password });
+      if (response.status === 200) {
+        navigate("/login");
+      } else {
+        throw new Error(response.data.error || "Registration failed");
+      }
+    } catch (error) {
+      setError(error.message);
+    }
+  };
 
-                <Form.Group className="mb-3" controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={(event) => setPassword(event.target.value)} />
-                </Form.Group>
-
-                <Form.Group className="mb-3" controlId="formBasicPassword">
-                    <Form.Label>re-enter the password</Form.Label>
-                    <Form.Control type="password" placeholder="re-enter the password" onChange={(event) => setSecPassword(event.target.value)} />
-                </Form.Group>
-
-                <Button className="button-primary" type="submit">
-                    회원가입
-                </Button>
-            </Form>
-        </div>
-    );
+  return (
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          회원가입
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+          {error && (
+            <Alert severity="error" sx={{ width: "100%", mt: 2, mb: 1 }}>
+              {error}
+            </Alert>
+          )}
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="이름"
+            name="name"
+            autoComplete="given-name"
+            autoFocus
+            onChange={(event) => setName(event.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="이메일 주소"
+            name="email"
+            autoComplete="email"
+            onChange={(event) => setEmail(event.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="패스워드"
+            type="password"
+            id="password"
+            autoComplete="new-password"
+            onChange={(event) => setPassword(event.target.value)}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="secPassword"
+            label="패스워드 확인"
+            type="password"
+            id="secPassword"
+            autoComplete="new-password"
+            onChange={(event) => setSecPassword(event.target.value)}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+          >
+            회원가입
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link component={RouterLink} to="/login" variant="body2">
+                이미 계정이 있으신가요? 로그인
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
+  );
 };
 
 export default RegisterPage;

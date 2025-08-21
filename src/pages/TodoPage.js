@@ -1,33 +1,38 @@
 import React, { useEffect, useState } from "react";
 import TodoBoard from "../components/TodoBoard";
 import api from "../utils/api";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
-import Container from "react-bootstrap/Container";
-import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
-const TodoPage = ({ setUser, user }) => {
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Button,
+  Box,
+  Container,
+} from "@mui/material";
+import LogoutIcon from '@mui/icons-material/Logout';
+
+const TodoPage = ({ user, setUser }) => {
   const [todoList, setTodoList] = useState([]);
-  const [todoValue, setTodoValue] = useState("");
   const navigate = useNavigate();
 
   const getTasks = async () => {
-    const response = await api.get("/tasks");
-    setTodoList(response.data.data);
+    try {
+      const response = await api.get("/tasks");
+      setTodoList(response.data.data);
+    } catch (error) {
+      console.log("error", error);
+    }
   };
 
-  const addTask = async () => {
+  const addTask = async (task) => {
     try {
       const response = await api.post("/tasks", {
-        task: todoValue,
+        task,
         isComplete: false,
       });
       if (response.status === 200) {
-        console.log("Success");
-        setTodoValue("");
         getTasks();
-      } else {
-        throw new Error("Task can not be added");
       }
     } catch (error) {
       console.log("error", error);
@@ -58,6 +63,7 @@ const TodoPage = ({ setUser, user }) => {
       console.log("error", error);
     }
   };
+
   const logout = () => {
     sessionStorage.removeItem("token");
     setUser(null);
@@ -67,42 +73,29 @@ const TodoPage = ({ setUser, user }) => {
   useEffect(() => {
     getTasks();
   }, []);
-  return (
-    <Container>
-      <div className="logout">
-        <Button className="logout-button" onClick={logout}>
-          로그아웃
-        </Button>
-      </div>
-      <Row className="add-item-row">
-        <Col xs={12} sm={10}>
-          <input
-            type="text"
-            placeholder="할일을 입력하세요"
-            className="input-box"
-            value={todoValue}
-            onChange={(event) => setTodoValue(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                addTask();
-              }
-            }}
-          />
-        </Col>
-        <Col xs={12} sm={2}>
-          <button className="button-add" onClick={addTask}>
-            추가
-          </button>
-        </Col>
-      </Row>
 
-      <TodoBoard
-        user={user}
-        todoList={todoList}
-        deleteItem={deleteItem}
-        toggleComplete={toggleComplete}
-      />
-    </Container>
+  return (
+    <Box sx={{ flexGrow: 1 }}>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            안녕하세요, {user?.name || '사용자'}님!
+          </Typography>
+          <Button color="inherit" onClick={logout} startIcon={<LogoutIcon />}>
+            로그아웃
+          </Button>
+        </Toolbar>
+      </AppBar>
+      <Container component="main" sx={{ mt: 4, mb: 4 }}>
+        <TodoBoard
+          user={user}
+          todoList={todoList}
+          addTask={addTask}
+          deleteItem={deleteItem}
+          toggleComplete={toggleComplete}
+        />
+      </Container>
+    </Box>
   );
 };
 

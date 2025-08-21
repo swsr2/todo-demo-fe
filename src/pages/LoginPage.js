@@ -1,60 +1,111 @@
 import React, { useState } from "react";
-import Button from "react-bootstrap/Button";
-import Form from "react-bootstrap/Form";
-import { Link } from "react-router-dom";
+import { Link as RouterLink, useNavigate, Navigate } from "react-router-dom";
 import api from "../utils/api";
-import { useNavigate, Navigate } from "react-router-dom";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  Container,
+  Grid,
+  Link,
+  Alert,
+  CircularProgress,
+} from "@mui/material";
+
 const LoginPage = ({ user, setUser }) => {
-    const [email, setEmail] = useState('')
-    const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const navigate = useNavigate()
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const checkUser = async (event) => {
-        event.preventDefault()
-        try {
-            const response = await api.post('/user/login', { email, password })
-            if (response.status === 200) {
-                setUser(response.data.user)
-                // console.log("유저", user)
-                sessionStorage.setItem("token", response.data.token)
-                api.defaults.headers["authorization"] = "Bearer " + response.data.token
-                setError("")
-                navigate('/')
-            }
-            throw new Error(response.message)
-        } catch (error) {
-            setError(error.message)
-        }
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const response = await api.post("/user/login", { email, password });
+      if (response.status === 200) {
+        setUser(response.data.user);
+        sessionStorage.setItem("token", response.data.token);
+        api.defaults.headers["authorization"] = "Bearer " + response.data.token;
+        navigate("/");
+      } else {
+        throw new Error(response.message || "Login failed");
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
-    if (user) {
-        return <Navigate to="/" />
-    }
-    return (
-        <div className="display-center">
-            {error && <div className="red-error">{error}</div>}
-            <Form className="login-box" onSubmit={checkUser}>
-                <h1>로그인</h1>
-                <Form.Group className="mb-3" controlId="formBasicEmail">
-                    <Form.Label>Email address</Form.Label>
-                    <Form.Control type="email" placeholder="Enter email" onChange={(event) => setEmail(event.target.value)} />
-                </Form.Group>
+  };
 
-                <Form.Group className="mb-3" controlId="formBasicPassword">
-                    <Form.Label>Password</Form.Label>
-                    <Form.Control type="password" placeholder="Password" onChange={(event) => setPassword(event.target.value)} />
-                </Form.Group>
-                <div className="button-box">
-                    <Button type="submit" className="button-primary">
-                        Login
-                    </Button>
-                    <span>
-                        계정이 없다면? <Link to="/register">회원가입 하기</Link>
-                    </span>
-                </div>
-            </Form>
-        </div>
-    );
+  if (user) {
+    return <Navigate to="/" />;
+  }
+
+  return (
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          marginTop: 8,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <Typography component="h1" variant="h5">
+          로그인
+        </Typography>
+        <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+          {error && <Alert severity="error" sx={{ width: '100%', mt: 2, mb: 2 }}>{error}</Alert>}
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            label="이메일 주소"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            value={email}
+            onChange={(event) => setEmail(event.target.value)}
+            disabled={loading}
+          />
+          <TextField
+            margin="normal"
+            required
+            fullWidth
+            name="password"
+            label="패스워드"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            disabled={loading}
+          />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 2 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} color="inherit" /> : "로그인"}
+          </Button>
+          <Grid container justifyContent="flex-end">
+            <Grid item>
+              <Link component={RouterLink} to="/register" variant="body2">
+                계정이 없으신가요? 회원가입
+              </Link>
+            </Grid>
+          </Grid>
+        </Box>
+      </Box>
+    </Container>
+  );
 };
 
 export default LoginPage;
