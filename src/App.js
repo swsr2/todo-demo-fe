@@ -2,7 +2,6 @@ import { Routes, Route } from "react-router-dom";
 import LoginPage from "./pages/LoginPage";
 import TodoPage from "./pages/TodoPage";
 import RegisterPage from "./pages/RegisterPage";
-import PrivateRoute from "./route/PrivateRoute";
 import { useEffect, useState } from "react";
 import api from "./utils/api";
 import { Container, CssBaseline, Box } from "@mui/material";
@@ -33,11 +32,7 @@ function App() {
         <Routes>
           <Route
             path="/"
-            element={
-              <PrivateRoute user={user}>
-                <TodoPage setUser={setUser} user={user} />
-              </PrivateRoute>
-            }
+            element={<TodoPage setUser={setUser} user={user} />}
           />
           <Route path="/register" element={<RegisterPage />} />
           <Route

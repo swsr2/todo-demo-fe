@@ -81,9 +81,11 @@ const TodoPage = ({ user, setUser }) => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             안녕하세요, {user?.name || '사용자'}님!
           </Typography>
-          <Button color="inherit" onClick={logout} startIcon={<LogoutIcon />}>
-            로그아웃
-          </Button>
+          {user && (
+            <Button color="inherit" onClick={logout} startIcon={<LogoutIcon />}>
+              로그아웃
+            </Button>
+          )}
         </Toolbar>
       </AppBar>
       <Container component="main" sx={{ mt: 4, mb: 4 }}>
