@@ -6,8 +6,7 @@
 **Frontend**
 React
 JavaScript
-CSS3
-MUI material
+Material-UI
 
 **Backend**
 Node.js
